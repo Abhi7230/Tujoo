@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weekly Mood Graph</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h2>Weekly Mood Graph</h2>
+    <canvas id="moodChart"></canvas>
+
+    <script>
+        async function fetchMoodData() {
+            const response = await fetch('/get_weekly_moods');
+            const moodData = await response.json();
+            
+            const labels = Object.keys(moodData);
+            const moods = Object.values(moodData);
+
+            const moodMap = {
+                "sadness": 1,
+                "happiness": 5,
+                "anger": 2,
+                "neutral": 3,
+                "love": 6,
+                "joy": 4,
+                "fear": 2,
+                "surprise": 5
+            };
+            
+            // Convert moods to numerical values
+            const moodScores = moods.map(mood => moodMap[mood] || 0);
+
+            const ctx = document.getElementById('moodChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Mood Score',
+                        data: moodScores,
+                        borderColor: 'blue',
+                        backgroundColor: 'rgba(0, 0, 255, 0.1)',
+                        fill: true
+                    }]
+                }
+            });
+        }
+
+        fetchMoodData();
+    </script>
+</body>
+</html>

@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Courier New', monospace;
+            background-color: #fff8dc;
+            color: #3e2723;
+        }
+
+        nav {
+            background: linear-gradient(135deg, #8b4513, #6b4226);
+            color: white;
+            padding: 1.5em;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        nav .nav-links {
+            display: flex;
+            gap: 2em;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-size: 1.5em;
+            text-transform: uppercase;
+        }
+
+        nav a:hover {
+            text-decoration: underline;
+            color: #6d9f83;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 80vh;
+            text-align: center;
+            padding: 30px;
+            background: rgba(255, 248, 220, 0.9);
+            border: 3px solid #8b4513;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 1.5em;
+            background-image: linear-gradient(90deg, #8b4513, #6d9f83, #3e5d47);
+            background-size: 200%;
+            background-clip: text;
+            color: transparent;
+            animation: gradientAnimation 5s infinite linear;
+            transition: transform 0.3s ease;
+        }
+
+        h1:hover {
+            transform: scale(1.15);
+        }
+
+        @keyframes gradientAnimation {
+            0% {background-position: 0%;}
+            100% {background-position: 200%;}
+        }
+
+        .admin-features {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .admin-features a {
+            font-size: 1.2em;
+            color: #8b4513;
+            text-decoration: none;
+            padding: 10px 20px;
+            border: 2px solid #8b4513;
+            border-radius: 10px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .admin-features a:hover {
+            background-color: #8b4513;
+            color: white;
+        }
+
+        .data-container {
+            margin-top: 20px;
+            width: 80%;
+            text-align: left;
+        }
+
+        .data-container table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-container th, .data-container td {
+            border: 1px solid #8b4513;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .data-container th {
+            background-color: #8b4513;
+            color: white;
+        }
+
+        .data-container tr:nth-child(even) {
+            background-color: #f5f5f5;
+        }
+
+        .data-container tr:hover {
+            background-color: #e0e0e0;
+        }
+
+        .delete-button {
+            background-color: #ff4444;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .delete-button:hover {
+            background-color: #cc0000;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-links">
+            <a href="home.html">Home</a>
+            <a href="diaryentry.html">Create Diary</a>
+            <a href="mood.html">Mood Graph</a>
+            <a href="calender.html">View Entry</a>
+            <a href="admin.html">Admin</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1>Admin Panel</h1>
+        <div class="admin-features">
+            <a href="#" onclick="fetchAllUsers()">Manage Users</a>
+            <a href="#" onclick="fetchAllEntries()">Manage Diary Entries</a>
+            <a href="#" onclick="generateReports()">Generate Reports</a>
+        </div>
+
+        <!-- Data Display Section -->
+        <div class="data-container" id="data-container">
+            <!-- Data will be dynamically inserted here -->
+        </div>
+    </div>
+
+    <script>
+        // Fetch All Users
+        async function fetchAllUsers() {
+            try {
+                const response = await fetch('/admin/users');
+                const data = await response.json();
+
+                if (data.length > 0) {
+                    let tableHTML = `
+                        <h2>User List</h2>
+                        <table>
+                            <tr>
+                                <th>Email</th>
+                                <th>Profession</th>
+                                <th>Interest</th>
+                                <th>Action</th>
+                            </tr>
+                    `;
+
+                    data.forEach(user => {
+                        tableHTML += `
+                            <tr>
+                                <td>${user.email}</td>
+                                <td>${user.profession || 'N/A'}</td>
+                                <td>${user.areaOfInterest || 'N/A'}</td>
+                                <td>
+                                    <button class="delete-button" onclick="deleteUser('${user.email}')">Delete</button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+
+                    tableHTML += `</table>`;
+                    document.getElementById('data-container').innerHTML = tableHTML;
+                } else {
+                    document.getElementById('data-container').innerHTML = '<p>No users found.</p>';
+                }
+            } catch (error) {
+                console.error('Error fetching users:', error);
+                document.getElementById('data-container').innerHTML = '<p>Error fetching users. Please try again.</p>';
+            }
+        }
+
+        // Delete a User
+        async function deleteUser(email) {
+            if (confirm(`Are you sure you want to delete user: ${email}?`)) {
+                try {
+                    const response = await fetch(`/admin/users/${email}`, {
+                        method: 'DELETE',
+                    });
+
+                    const result = await response.json();
+                    alert(result.message);
+                    fetchAllUsers(); // Refresh the user list
+                } catch (error) {
+                    console.error('Error deleting user:', error);
+                    alert('Failed to delete user.');
+                }
+            }
+        }
+
+        // Fetch All Diary Entries
+        async function fetchAllEntries() {
+            try {
+                const response = await fetch('/admin/entries');
+                const data = await response.json();
+
+                if (data.length > 0) {
+                    let tableHTML = `
+                        <h2>Diary Entries</h2>
+                        <table>
+                            <tr>
+                                <th>Date</th>
+                                <th>Entry</th>
+                                <th>Action</th>
+                            </tr>
+                    `;
+
+                    data.forEach(entry => {
+                        tableHTML += `
+                            <tr>
+                                <td>${new Date(entry.date).toLocaleDateString()}</td>
+                                <td>${entry.entry}</td>
+                                <td>
+                                    <button class="delete-button" onclick="deleteEntry('${entry._id}')">Delete</button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+
+                    tableHTML += `</table>`;
+                    document.getElementById('data-container').innerHTML = tableHTML;
+                } else {
+                    document.getElementById('data-container').innerHTML = '<p>No diary entries found.</p>';
+                }
+            } catch (error) {
+                console.error('Error fetching entries:', error);
+                document.getElementById('data-container').innerHTML = '<p>Error fetching entries. Please try again.</p>';
+            }
+        }
+
+        // Delete a Diary Entry
+        async function deleteEntry(entryId) {
+            if (confirm('Are you sure you want to delete this diary entry?')) {
+                try {
+                    const response = await fetch(`/admin/entries/${entryId}`, {
+                        method: 'DELETE',
+                    });
+
+                    const result = await response.json();
+                    alert(result.message);
+                    fetchAllEntries(); // Refresh the entry list
+                } catch (error) {
+                    console.error('Error deleting entry:', error);
+                    alert('Failed to delete entry.');
+                }
+            }
+        }
+
+        // Generate Reports
+        async function generateReports() {
+            try {
+                const response = await fetch('/admin/reports');
+                const data = await response.json();
+
+                let reportHTML = `
+                    <h2>System Reports</h2>
+                    <p><strong>Total Users:</strong> ${data.userCount}</p>
+                    <p><strong>Total Diary Entries:</strong> ${data.entryCount}</p>
+                `;
+
+                document.getElementById('data-container').innerHTML = reportHTML;
+            } catch (error) {
+                console.error('Error generating reports:', error);
+                document.getElementById('data-container').innerHTML = '<p>Error generating reports. Please try again.</p>';
+            }
+        }
+    </script>
+</body>
+</html>

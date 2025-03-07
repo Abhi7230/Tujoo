@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diary Entry Page</title>
+  <style>
+    /* Your existing CSS styling remains unchanged */
+    body {
+      font-family: 'Courier New', monospace;
+      margin: 0;
+      padding: 0;
+      background: url('parchment-background.jpg') no-repeat center center fixed;
+      background-size: cover;
+      color: #3e2723;
+    }
+    .container {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: flex-start;
+      height: 100vh;
+      padding: 20px;
+    }
+    .diary {
+      width: 75%;
+      height: 90%;
+      background-color: rgba(255, 248, 220, 0.9);
+      border: 3px solid #8b4513;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .header {
+      text-align: center;
+      font-size: 2rem;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+    .date-container {
+      text-align: right;
+      margin-top: 10px;
+    }
+    .day {
+      font-size: 1.5rem;
+      color: #8b4513;
+      font-weight: bold;
+      font-style: italic;
+    }
+    .date {
+      font-size: 1.2rem;
+      color: #8b4513;
+      font-style: italic;
+      font-weight: normal;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+    }
+    .content {
+      flex-grow: 1;
+      font-size: 1.2rem;
+      line-height: 1.6;
+      padding: 20px;
+      background: repeating-linear-gradient(
+        rgba(255, 255, 255, 0.5),
+        rgba(255, 255, 255, 0.5) 48px,
+        rgba(249, 245, 240, 0.5) 49px,
+        rgba(249, 245, 240, 0.5) 50px
+      );
+      border-radius: 10px;
+      overflow-y: auto;
+    }
+    textarea {
+      width: 100%;
+      height: calc(100% - 60px);
+      border: none;
+      outline: none;
+      resize: none;
+      background: transparent;
+      font-size: 1.2rem;
+      line-height: 1.6;
+      font-family: 'Courier New', monospace;
+      color: #3e2723;
+    }
+    .footer {
+      text-align: center;
+      margin-top: 20px;
+    }
+    .footer button {
+      background-color: #8b4513;
+      border: none;
+      border-radius: 5px;
+      padding: 10px 20px;
+      cursor: pointer;
+      font-size: 1rem;
+      color: white;
+      font-weight: bold;
+    }
+    .footer button:hover {
+      background-color: #6b4226;
+    }
+    .ink-section {
+      width: 20%;
+      height: 100%;
+      position: relative;
+    }
+    .feather-gif {
+      width: 350px;
+      height: auto;
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: none;
+    }
+    /* Modal styling */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.4);
+    }
+    .modal-content {
+      background-color: #fefefe;
+      margin: 15% auto;
+      padding: 20px;
+      border: 2px solid #8b4513;
+      border-radius: 10px;
+      width: 40%;
+      text-align: center;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    }
+    .modal-button {
+      background-color: #8b4513;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 10px 20px;
+      margin: 10px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    .modal-button:hover {
+      background-color: #6b4226;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="diary">
+      <div class="header">
+        TuJo: The Technical Yujo
+        <div class="date-container">
+          <div class="day" id="day-display"></div>
+          <div class="date" id="date-display"></div>
+        </div>
+      </div>
+      <div class="content">
+        <textarea id="diaryEntry" placeholder="Write your thoughts here..."></textarea>
+      </div>
+      <div class="footer">
+        <button onclick="saveEntry()">Save Entry</button>
+        <button onclick="getRecommendation()">Get reccomendation</button>
+      </div>
+    </div>
+    <div class="ink-section">
+      <!-- For the image tag -->
+      <img src="{{ url_for('static', filename='XeLwonwsJDBGg0kbgW.webp') }}" alt="Ink Bottle and Feather" class="feather-gif" id="inkFeatherGif"> 
+    </div>
+  </div>
+
+  <!-- Modal Popup -->
+  <div id="actionModal" class="modal">
+    <div class="modal-content">
+      <p>An entry already exists for today. What would you like to do?</p>
+      <button id="continueEntry" class="modal-button">Continue Existing Entry</button>
+      <button id="newEntry" class="modal-button">Create New Entry</button>
+    </div>
+  </div>
+
+  <script>
+    // Display current date and day
+    const dateDisplay = document.getElementById('date-display');
+    const dayDisplay = document.getElementById('day-display');
+    const currentDate = new Date();
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    const dayOptions = { weekday: 'long' };
+
+    dateDisplay.innerText = currentDate.toLocaleDateString(undefined, options);
+    dayDisplay.innerText = currentDate.toLocaleDateString(undefined, dayOptions);
+
+    // Feather GIF logic
+    const textarea = document.getElementById('diaryEntry');
+    const inkFeatherGif = document.getElementById('inkFeatherGif');
+
+    textarea.addEventListener('focus', () => {
+      inkFeatherGif.style.display = 'block';
+    });
+
+    textarea.addEventListener('blur', () => {
+      inkFeatherGif.style.display = 'none';
+    });
+
+    async function getRecommendation() {
+    const diaryText = document.getElementById('diaryEntry').value.trim();
+    
+    if (!diaryText) {
+        alert('Please write something to get a recommendation!');
+        return;
+    }
+    
+    try {
+        console.log("Sending request to get recommendation...");
+        const response = await fetch('http://localhost:5000/get_recommendation', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ entry: diaryText })
+        });
+        
+        console.log("Response status:", response.status);
+        const data = await response.json();
+        console.log("Response data:", data);
+        
+        if (response.ok) {
+            // Display recommendation to the user
+            alert(`Based on your mood (${data.mood}), here's a recommendation: ${data.recommendation}`);
+        } else {
+            alert(data.error || 'Failed to get recommendation. Please try again.');
+        }
+    } catch (error) {
+        console.error('Error getting recommendation:', error);
+        alert('An error occurred. Please try again later.');
+    }
+}
+
+// Update your button in HTML to call this function
+// <button onclick="getRecommendation()">Get recommendation</button>
+    // Save entry to the Flask backend for mood detection
+    async function saveEntry() {
+      const diaryText = document.getElementById('diaryEntry').value.trim();
+
+      if (!diaryText) {
+        alert('Please write something before saving!');
+        return;
+      }
+
+      try {
+        // Call the Flask endpoint on port 5000 for mood detection and saving.
+        const response = await fetch('http://localhost:5000/add_entry', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ entry: diaryText })
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          alert(`Diary entry saved successfully!\nDetected Mood: ${result.mood}`);
+          document.getElementById('diaryEntry').value = ''; // Clear the textarea
+        } else {
+          alert(result.message || 'Failed to save entry. Please try again.');
+        }
+      } catch (error) {
+        console.error('Error saving entry:', error);
+        alert('An error occurred. Please try again later.');
+      }
+    }
+
+    // Modal handling (if you plan to support multiple entries per day)
+    window.onclick = (event) => {
+      const modal = document.getElementById('actionModal');
+      if (event.target === modal) {
+        modal.style.display = 'none';
+      }
+    };
+  </script>
+  <!-- Add this to your HTML template (diaryentry1.html) -->
+<div id="recommendationModal" class="recommendation-modal" style="display: none;">
+  <div class="recommendation-content">
+      <p id="recommendationText"></p>
+      <button id="closeModal" class="close-button">Close</button>
+  </div>
+</div>
+
+<style>
+.recommendation-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.recommendation-content {
+  background-color: #f9f9f9;
+  padding: 20px;
+  border-radius: 10px;
+  max-width: 80%;
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.close-button {
+  margin-top: 15px;
+  padding: 8px 16px;
+  background-color: #8B5A2B;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.close-button:hover {
+  background-color: #6B4423;
+}
+
+#recommendationText {
+  font-size: 16px;
+  line-height: 1.5;
+  color: #333;
+}
+</style>
+
+<script>
+// Add this JavaScript to handle the recommendation
+document.addEventListener('DOMContentLoaded', function() {
+  const getRecommendationBtn = document.querySelector('button[id="getRecommendation"]') || 
+                               document.querySelector('button:contains("Get Recommendation")') ||
+                               document.querySelector('button:contains("Get recommendation")') ||
+                               document.querySelector('button:contains("Get reccomendation")');
+  
+  if (getRecommendationBtn) {
+      getRecommendationBtn.addEventListener('click', function() {
+          const entryText = document.querySelector('textarea').value;
+          if (!entryText) {
+              alert('Please write an entry first!');
+              return;
+          }
+          
+          fetch('/get_recommendation', {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ entry: entryText }),
+          })
+          .then(response => response.json())
+          .then(data => {
+              // Show custom modal instead of alert
+              const modal = document.getElementById('recommendationModal');
+              const recommendationText = document.getElementById('recommendationText');
+              recommendationText.textContent = `It's okay to feel ${data.mood}. ${data.recommendation}`;
+              modal.style.display = 'flex';
+          })
+          .catch(error => {
+              console.error('Error:', error);
+              alert('Error getting recommendation');
+          });
+      });
+  }
+  
+  // Close modal when the close button is clicked
+  document.getElementById('closeModal').addEventListener('click', function() {
+      document.getElementById('recommendationModal').style.display = 'none';
+  });
+});
+</script>
+</body>
+</html>

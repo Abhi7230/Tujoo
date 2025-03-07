@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Courier New', monospace;
+            background-color: #fff8dc;
+            text-align: center;
+            color: #3e2723;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 0.5em 0;
+            color: #3e2723;
+        }
+
+        p {
+            font-size: 1.2rem;
+            margin: 0.5em 0 2em;
+            color: #3e2723;
+        }
+
+        .form-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .form-container input {
+            font-size: 1.2rem;
+            padding: 10px;
+            margin: 0.5em;
+            width: 80%;
+            max-width: 400px;
+            border-radius: 10px;
+            border: 2px solid #8b4513;
+            color: #3e2723;
+            background-color: rgba(255, 248, 220, 0.9);
+        }
+
+        .form-container button {
+            position: relative;
+            font-size: 1.2rem;
+            font-weight: bold;
+            height: 50px;
+            width: 80%;
+            max-width: 400px;
+            padding: 10px;
+            background-color: #8b4513;
+            color: white;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            transition: 0.3s all ease;
+            font-family: 'Courier New', monospace;
+        }
+
+        .form-container button:hover {
+            background-color: #6b4226;
+        }
+
+        .form-container button:active {
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Login</h1>
+        <p>Enter your details to access TuJo</p>
+        <div class="form-container">
+            <form id="loginForm">
+                <input type="text" id="email" placeholder="Username">
+                <input type="password" id="password" placeholder="Password">
+                <button type="submit" id="loginButton">Login</button>
+            </form>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+    const loginButton = document.getElementById('loginButton');
+    const loginForm = document.getElementById('loginForm');
+
+    if (loginButton) {
+        loginButton.addEventListener('click', async (e) => {
+            e.preventDefault(); // Prevent form submission
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            if (!email || !password) {
+                alert('Please enter both email and password.');
+                return;
+            }
+
+            try {
+                const response = await fetch('http://localhost:3000/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password }),
+                });
+
+                const result = await response.json();
+                console.log("Login response:", response.status, result);
+
+                if (response.ok && result.success) {
+                    // Store the user's email and role in localStorage
+                    localStorage.setItem('userEmail', email);
+                    localStorage.setItem('userRole', result.role || 'user');
+
+                    alert('Login successful!');
+                    console.log("Redirecting to home.html...");
+                    window.location.href = "home.html"; // Redirect on success
+                } else {
+                    alert(result.message || 'Login failed. Please check your credentials and try again.');
+                }
+            } catch (error) {
+                console.error('Error during login:', error);
+                alert('An error occurred during login. Please try again later.');
+            }
+        });
+    } else {
+        console.error('Login button not found.');
+    }
+});
+    </script>
+</body>
+</html>

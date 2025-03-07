@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Courier New', monospace;
+            background-color: #fff8dc;
+            text-align: center;
+            color: #3e2723;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 0.5em 0;
+            color: #3e2723;
+        }
+
+        p {
+            font-size: 1.2rem;
+            margin: 0.5em 0 2em;
+            color: #3e2723;
+        }
+
+        .form-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .form-container h2 {
+            font-size: 2rem;
+            color: #3e2723;
+            margin-bottom: 1em;
+        }
+
+        .form-container input, .form-container select {
+            font-size: 1.2rem;
+            padding: 10px;
+            margin: 0.5em;
+            width: 80%;
+            max-width: 400px;
+            border-radius: 10px;
+            border: 2px solid #8b4513;
+            color: #3e2723;
+            background-color: rgba(255, 248, 220, 0.9);
+        }
+
+        .form-container button {
+            position: relative;
+            font-size: 1.2rem;
+            font-weight: bold;
+            height: 50px;
+            width: 80%;
+            max-width: 400px;
+            padding: 10px;
+            background-color: #8b4513;
+            color: white;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            transition: 0.3s all ease;
+            font-family: 'Courier New', monospace;
+        }
+
+        .form-container button:hover {
+            background-color: #6b4226;
+        }
+
+        .form-container button:active {
+            transform: scale(0.95);
+        }
+
+        .redirect {
+            margin-top: 1em;
+        }
+
+        .redirect a {
+            color: #3e2723;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .redirect a:hover {
+            text-decoration: underline;
+        }
+
+        /* Admin Field Styling */
+        .admin-field {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 80%;
+            max-width: 400px;
+            margin: 0.5em;
+        }
+
+        .admin-field label {
+            font-size: 1.2rem;
+            color: #3e2723;
+            font-weight: bold;
+        }
+
+        .admin-options {
+            display: flex;
+            gap: 10px;
+        }
+
+        .admin-options label {
+            font-size: 1.2rem;
+            color: #3e2723;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .admin-options input[type="radio"] {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>TuJo: The Technical Yujo</h1>
+        <p>Your Journey, Your Thoughts: <span style="font-weight: bold;">Discover, Reflect</span> and <span style="font-weight: bold;">Grow</span></p>
+
+        <div class="form-container">
+            <h2>Create Your Account</h2>
+            <form id="signupForm">
+                <input type="email" id="email" placeholder="Email" name="email" required><br>
+                <input type="password" id="password" placeholder="Password" name="password" required><br>
+                <input type="password" id="confirmPassword" placeholder="Confirm Password" name="confirmPassword" required><br>
+                <input type="text" id="profession" placeholder="Profession" name="profession" required><br>
+                <input type="text" id="areaOfInterest" placeholder="Area of Interest" name="areaOfInterest" required><br>
+                
+                <!-- Admin Field with Label and Yes/No Options -->
+                <div class="admin-field">
+                    <label for="isAdmin">Admin:</label>
+                    <div class="admin-options">
+                        <label>
+                            <input type="radio" id="isAdminYes" name="isAdmin" value="yes" required> Yes
+                        </label>
+                        <label>
+                            <input type="radio" id="isAdminNo" name="isAdmin" value="no" required> No
+                        </label>
+                    </div>
+                </div>
+                
+                <button type="submit">Sign Up</button>
+            </form>
+            <div class="redirect">
+                <p>Already have an account? <a href="login.html">Login here</a>.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("signupForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+            const confirmPassword = document.getElementById("confirmPassword").value;
+            const profession = document.getElementById("profession").value;
+            const areaOfInterest = document.getElementById("areaOfInterest").value;
+            const isAdmin = document.querySelector('input[name="isAdmin"]:checked').value === 'yes';
+
+            // Check if passwords match
+            if (password !== confirmPassword) {
+                alert('Passwords do not match!');
+                return;
+            }
+
+            // Check if all required fields are filled
+            if (!email || !password || !confirmPassword || !profession || !areaOfInterest) {
+                alert('Please fill out all required fields.');
+                return;
+            }
+
+            // Prepare data for the backend
+            const data = {
+                email,
+                password,
+                confirmPassword,
+                profession,
+                areaOfInterest,
+                isAdmin
+            };
+
+            try {
+                // Send data to backend
+                const response = await fetch("http://localhost:3000/signup", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(data)
+                });
+
+                // Handle the response from the backend
+                if (response.ok) {
+                    alert('Signup successful! Redirecting to login page...');
+                    window.location.href = 'login.html'; // Redirect to login page
+                } else {
+                    const errorMessage = await response.json();
+                    alert('Error during signup: ' + errorMessage.message);
+                }
+            } catch (error) {
+                console.error('Error during signup:', error);
+                alert('An error occurred during signup. Please try again.');
+            }
+        });
+    </script>
+</body>
+</html>

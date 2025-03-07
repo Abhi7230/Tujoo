@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feather Writing Animation</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Dancing Script', monospace;
+            background-color: rgba(255, 248, 220, 0.9);
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #3e2723;
+        }
+
+        .container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        .feather {
+            position: absolute;
+            width: 100px;
+            bottom: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+            transform-origin: top;
+            animation: shake 3s ease-in-out infinite, moveWithText 3s steps(30) 6s forwards, disappearFeather 1s ease 10s forwards;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(-50%) rotate(0); }
+            25% { transform: translateX(-50%) rotate(-10deg); }
+            50% { transform: translateX(-50%) rotate(10deg); }
+            75% { transform: translateX(-50%) rotate(-5deg); }
+        }
+
+        @keyframes moveWithText {
+            from { top: 20%; left: 50%; }
+            to { top: 20%; left: 70%; } /* Adjust based on text length */
+        }
+
+        @keyframes disappearFeather {
+            100% { opacity: 0; }
+        }
+
+        .writing {
+            font-family: 'Dancing Script', monospace;
+            font-size: 3rem;
+            font-weight: bold;
+            color: #3e2723;
+            position: absolute;
+            top: 20%;
+            left: 20%;
+            width: 0;
+            overflow: hidden;
+            white-space: nowrap;
+            border-right: 2px solid #3e2723;
+            animation: typing 2s steps(30) 6s forwards, blink 0.5s step-end infinite 9s;
+        }
+
+        @keyframes typing {
+            from { width: 0; }
+            to { width: 24ch; } /* Adjust based on text length */
+        }
+
+        @keyframes blink {
+            50% { border-right-color: transparent; }
+        }
+
+        .center-content {
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .center-content h1 {
+             font-family: 'Dancing Script', cursive;
+            font-size: 3rem;
+            margin: 0;
+        }
+
+        .center-content p {
+            font-size: 1.2rem;
+            margin: 1rem 0;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .buttons button {
+            font-size: 1rem;
+            font-weight: bold;
+            height: 50px;
+            width: 200px;
+            background-color: #8b4513;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.5s ease;
+        }
+
+        .buttons button:hover {
+            background-color: #6b4226;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="feather.png.png" alt="Feather" class="feather">
+        <div class="writing">TuJo: The Technical Yujo</div>
+        <div class="center-content">
+            <h1>TuJo: The Technical Yujo</h1>
+            <p>Your Journey, Your Thoughts: Discover, Reflect, and Grow</p>
+            <div class="buttons">
+                <button onclick="window.location.href='signup.html';">Create My Diary</button>
+                <button onclick="window.location.href='login.html';">Login to My Diary</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Start animations after page loads
+        const feather = document.querySelector('.feather');
+        const writing = document.querySelector('.writing');
+        const centerContent = document.querySelector('.center-content');
+
+        window.onload = () => {
+            feather.style.animationPlayState = 'running';
+            writing.style.animationPlayState = 'running';
+
+            // Show center content 1 second after the feather disappears
+            setTimeout(() => {
+                writing.style.opacity = '0';
+                centerContent.style.display = 'flex';
+            }, 10000); // Wait 1 second after feather disappears
+        };
+    </script>
+</body>
+</html>

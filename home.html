@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Diary</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Courier New', monospace;
+            background-color: #fff8dc;
+            color: #3e2723;
+        }
+
+        nav {
+            background: linear-gradient(135deg, #8b4513, #6b4226);
+            color: white;
+            padding: 1.5em;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        nav .nav-links {
+            display: flex;
+            gap: 2em;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-size: 1.5em;
+            text-transform: uppercase;
+        }
+
+        nav a:hover {
+            text-decoration: underline;
+            color: #6d9f83;
+        }
+
+        .profile-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .profile-button {
+            background: #6b4226;
+            color: white;
+            font-size: 1.2em;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            border: none;
+            transition: 0.3s ease;
+        }
+
+        .profile-button:hover {
+            background: #8b4513;
+        }
+
+        .dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            background: #fff8dc;
+            border: 2px solid #8b4513;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            width: 250px;
+            text-align: left;
+            padding: 10px;
+        }
+
+        .dropdown p {
+            font-size: 1em;
+            color: #3e2723;
+            margin: 10px 0;
+            padding: 5px 15px;
+        }
+
+        .dropdown p strong {
+            color: #8b4513;
+        }
+
+        .show {
+            display: block;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 80vh;
+            text-align: center;
+            padding: 30px;
+            background: rgba(255, 248, 220, 0.9);
+            border: 3px solid #8b4513;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 1.5em;
+            background-image: linear-gradient(90deg, #8b4513, #6d9f83, #3e5d47);
+            background-size: 200%;
+            background-clip: text;
+            color: transparent;
+            animation: gradientAnimation 5s infinite linear;
+            transition: transform 0.3s ease;
+        }
+
+        h1:hover {
+            transform: scale(1.15);
+        }
+
+        @keyframes gradientAnimation {
+            0% {background-position: 0%;}
+            100% {background-position: 200%;}
+        }
+
+        p {
+            font-size: 1.4em;
+            line-height: 1.9;
+            max-width: 800px;
+            margin: 1.5em auto;
+            color: #3e2723;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-links">
+            <a href="home.html">Home</a>
+            <a href="diaryentry.html">Create Diary</a>
+            <a href="mood.html">Mood Graph</a>
+            <a href="calender.html">View Entry</a>
+            <a id="adminLink" href="admin.html" style="display: none;">Admin</a> <!-- Conditionally rendered -->
+        </div>
+
+        <div class="profile-container">
+            <button class="profile-button" onclick="toggleDropdown()">Profile</button>
+            <div class="dropdown" id="profileDropdown">
+                <p><strong>Email:</strong> <span id="userEmail">Loading...</span></p>
+                <p><strong>Profession:</strong> <span id="userProfession">Loading...</span></p>
+                <p><strong>Interest:</strong> <span id="userInterest">Loading...</span></p>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1>Welcome to AI Diary</h1>
+        <p>Start your writing adventure with AI Diary! This platform offers personalized suggestions, mood tracking, and daily summaries to enhance your journaling experience. Explore features like creating diary entries, viewing your mood graph, and generating insightful summaries.</p>
+    </div>
+
+    <script>
+        let userData = {}; // Global storage for user data
+
+        async function fetchUserData() {
+            try {
+                const userEmail = localStorage.getItem('userEmail');
+
+                if (!userEmail) {
+                    console.error("User email not found in localStorage");
+                    return;
+                }
+
+                let response = await fetch(`http://localhost:3000/fetch-user?email=${userEmail}`);
+                let data = await response.json();
+
+                userData = data; // Store API response
+                updateProfileUI(); // Update UI separately
+
+                // Show the Admin link only if the user is an admin
+                if (userData.role === 'admin') {
+                    document.getElementById('adminLink').style.display = 'block';
+                } else {
+                    document.getElementById('adminLink').style.display = 'none';
+                }
+            } catch (error) {
+                console.error("Error fetching user data:", error);
+            }
+        }
+
+        function updateProfileUI() {
+            document.getElementById("userEmail").innerText = userData.email ?? "Not Available";
+            document.getElementById("userProfession").innerText = userData.profession ?? "Not Available";
+            document.getElementById("userInterest").innerText = userData.areaOfInterest ?? userData.interest ?? "Not Available";
+        }
+
+        function toggleDropdown() {
+            let dropdown = document.getElementById("profileDropdown");
+            dropdown.classList.toggle("show");
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener("click", function(event) {
+            let dropdown = document.getElementById("profileDropdown");
+            let button = document.querySelector(".profile-button");
+
+            if (!dropdown.contains(event.target) && !button.contains(event.target)) {
+                dropdown.classList.remove("show");
+            }
+        });
+
+        // Fetch user data when the page loads
+        document.addEventListener("DOMContentLoaded", fetchUserData);
+        document.addEventListener("DOMContentLoaded", function () {
+    // Fetch the user's role from localStorage
+    const userRole = localStorage.getItem('userRole');
+
+    // Show the Admin link only if the user is an admin
+    if (userRole === 'admin') {
+        document.getElementById('adminLink').style.display = 'block';
+    } else {
+        document.getElementById('adminLink').style.display = 'none';
+    }
+
+    // Fetch and display user profile data
+    fetchUserData();
+});
+    </script>
+</body>
+</html>
